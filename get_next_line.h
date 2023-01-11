@@ -6,7 +6,7 @@
 /*   By: dajeon <dajeon@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/11 14:51:29 by dajeon            #+#    #+#             */
-/*   Updated: 2023/01/11 15:00:28 by dajeon           ###   ########.fr       */
+/*   Updated: 2023/01/11 16:19:51 by dajeon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 #  define BUFFER_SIZE 5
 # endif
 
-size_t	ft_memchr_size(const void *m, int c, size_t n);
 char	*get_next_line(int fd);
+size_t	ft_memchr_size(const void *m, int c, size_t n);
 char	*ft_append_nsize(char *s1, const char *s2, size_t n);
 
 #endif

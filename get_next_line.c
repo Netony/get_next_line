@@ -6,7 +6,7 @@
 /*   By: dajeon <dajeon@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/10 18:39:15 by dajeon            #+#    #+#             */
-/*   Updated: 2023/01/11 15:09:47 by dajeon           ###   ########.fr       */
+/*   Updated: 2023/01/11 16:38:05 by dajeon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ char	*get_next_line(int fd)
 	static char	*get_next_line;
 	char		buf[BUFFER_SIZE];
 	char		*ret;
-	size_t		buf_max;
+	int			buf_max;
 	size_t		size;
 
 	while (1)
@@ -28,7 +28,13 @@ char	*get_next_line(int fd)
 		if (buf_max == 0)
 		{
 			ret = get_next_line;
+			free(get_next_line);
 			break ;
+		}
+		else if (buf_max == -1)
+		{
+			free(get_next_line);
+			return (NULL);
 		}
 		size = ft_memchr_size(buf, '\n', buf_max);
 		if (size)
@@ -67,7 +73,7 @@ char	*ft_append_nsize(char *s1, const char *s2, size_t n)
 	char	*append;
 
 	len = ft_strlen(s1);
-	append = (char *)malloc(sizeof(char) * (len + n));
+	append = (char *)malloc(sizeof(char) * (1 + len + n));
 	if (append)
 	{
 		i = 0;
@@ -76,11 +82,13 @@ char	*ft_append_nsize(char *s1, const char *s2, size_t n)
 			append[i] = s1[i];
 			i++;
 		}
-		free(s1);
+		if (s1)
+			free(s1);
 		j = 0;
 		while (j++ < n)
 			append[i++] = *(s2++);
-		append[i] = '\0';
+		if (append[i - 1] != '\0')
+			append[i] = '\0';
 	}
 	return (append);
 }
