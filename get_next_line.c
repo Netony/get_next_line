@@ -6,50 +6,57 @@
 /*   By: dajeon <dajeon@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/10 18:39:15 by dajeon            #+#    #+#             */
-/*   Updated: 2023/01/11 16:38:05 by dajeon           ###   ########.fr       */
+/*   Updated: 2023/01/12 15:41:42 by dajeon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static size_t	ft_strlen(const char *s1);
+static char		*append_n(char *s1, const char *s2, size_t s2_len);
+static void		check_n_free(void *check);
+static size_t	find_n(const void *m, int c, size_t n);
+static size_t	len(const char *s1);
+
+#include <stdio.h>
 
 char	*get_next_line(int fd)
 {
-	static char	*get_next_line;
+	static char	*stack;
 	char		buf[BUFFER_SIZE];
+	char		*temp;
 	char		*ret;
-	int			buf_max;
-	size_t		size;
+	int			buf_size;
+	size_t		ret_size;
 
-	while (1)
+	while (stack == NULL || !find_n(stack, '\n', len(stack)))
 	{
-		buf_max = read(fd, buf, BUFFER_SIZE);
-		if (buf_max == 0)
+		buf_size = read(fd, buf, BUFFER_SIZE);
+		if (buf_size == -1)
 		{
-			ret = get_next_line;
-			free(get_next_line);
-			break ;
-		}
-		else if (buf_max == -1)
-		{
-			free(get_next_line);
+			check_n_free(stack);
 			return (NULL);
 		}
-		size = ft_memchr_size(buf, '\n', buf_max);
-		if (size)
-		{
-			ret = ft_append_nsize(get_next_line, buf, size);
-			get_next_line = ft_append_nsize(NULL, buf + size, buf_max - size);
+		stack = append_n(stack, buf, buf_size);
+		if (buf_size == 0)
 			break ;
-		}
-		else
-			get_next_line = ft_append_nsize(get_next_line, buf, buf_max);
 	}
+	if (!find_n(stack, '\n', len(stack)))
+	{
+		ret = append_n(NULL, stack, len(stack));
+		temp = NULL;
+	}
+	else
+	{
+		ret_size = find_n(stack, '\n', len(stack));
+		ret = append_n(NULL, stack, ret_size);
+		temp = append_n(NULL, stack + ret_size, len(stack) - ret_size);
+	}
+	check_n_free(stack);
+	stack = temp;
 	return (ret);
 }
 
-size_t	ft_memchr_size(const void *m, int c, size_t n)
+static size_t	find_n(const void *m, int c, size_t n)
 {
 	size_t	size;
 	char	*s;
@@ -65,35 +72,38 @@ size_t	ft_memchr_size(const void *m, int c, size_t n)
 	return (0);
 }
 
-char	*ft_append_nsize(char *s1, const char *s2, size_t n)
+static char	*append_n(char *s1, const char *s2, size_t s2_len)
 {
-	size_t	len;
+	size_t	s1_len;
 	size_t	i;
 	size_t	j;
 	char	*append;
 
-	len = ft_strlen(s1);
-	append = (char *)malloc(sizeof(char) * (1 + len + n));
+	s1_len = len(s1);
+	if (s1_len + s2_len == 0)
+		return (NULL);
+	append = (char *)malloc(sizeof(char) * (1 + s1_len + s2_len));
 	if (append)
 	{
 		i = 0;
-		while (i < len)
+		while (i < s1_len)
 		{
 			append[i] = s1[i];
 			i++;
 		}
-		if (s1)
-			free(s1);
+		check_n_free(s1);
 		j = 0;
-		while (j++ < n)
-			append[i++] = *(s2++);
-		if (append[i - 1] != '\0')
-			append[i] = '\0';
+		while (j < s2_len)
+		{
+			append[i + j] = s2[j];
+			j++;
+		}
+		append[i + j] = '\0';
 	}
 	return (append);
 }
 
-static size_t	ft_strlen(const char *s1)
+static size_t	len(const char *s1)
 {
 	size_t	len;
 
@@ -105,3 +115,16 @@ static size_t	ft_strlen(const char *s1)
 	}
 	return (len);
 }
+
+static void	check_n_free(void *check)
+{
+	if (check == NULL)
+		return ;
+	else
+	{
+		free(check);
+		check = NULL;
+	}
+}
+
+	
